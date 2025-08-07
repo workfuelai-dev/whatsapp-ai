@@ -1,0 +1,44 @@
+{
+  "name": "whatsapp-ai",
+  "version": "1.0.0",
+  "description": "Sistema de comunicación empresarial con WhatsApp Business API v23 e inteligencia artificial",
+  "main": "web/index.html",
+  "scripts": {
+    "dev": "cd web && python -m http.server 8000",
+    "dev:supabase": "supabase start",
+    "deploy": "supabase functions deploy",
+    "deploy:webhook": "supabase functions deploy whatsapp-webhook",
+    "deploy:ai": "supabase functions deploy ai-response",
+    "deploy:manual": "supabase functions deploy manual-override",
+    "deploy:auth": "supabase functions deploy simple-auth",
+    "logs": "supabase functions logs --follow",
+    "db:reset": "supabase db reset",
+    "setup": "npm run setup:help",
+    "setup:help": "echo '\n🚀 WhatsApp AI Setup:\n1. supabase login\n2. supabase projects list\n3. supabase link --project-ref YOUR_PROJECT_ID\n4. Configure environment variables in Supabase Dashboard\n5. npm run deploy\n6. npm run dev\n'"
+  },
+  "keywords": [
+    "whatsapp",
+    "ai",
+    "chatbot",
+    "supabase",
+    "openai",
+    "business",
+    "customer-service"
+  ],
+  "author": "Tu Empresa",
+  "license": "Private",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "private"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
