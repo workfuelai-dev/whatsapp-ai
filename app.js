@@ -1,16 +1,20 @@
 /**
  * WhatsApp AI - Frontend Application
- * Interfaz de usuario para gestionar chats de WhatsApp con IA
+ * Interfaz de usuario mejorada para gestionar chats de WhatsApp con IA
+ * Incluye funcionalidades avanzadas de UX y interactividad
  */
 
 class WhatsAppAI {
     constructor() {
-        this.baseUrl = 'https://rowrcdcrvcprmjasfrql.supabase.co/functions/v1'; // URL correcta con /functions/v1
-        this.token = localStorage.getItem('authToken'); // Usar el mismo nombre que en el HTML
+        this.baseUrl = 'https://rowrcdcrvcprmjasfrql.supabase.co/functions/v1';
+        this.token = localStorage.getItem('authToken');
         this.currentChatId = null;
         this.chats = [];
         this.messages = [];
         this.pollInterval = null;
+        this.isTyping = false;
+        this.searchQuery = '';
+        this.activeFilter = 'all';
 
         // Esperar a que el DOM esté listo
         if (document.readyState === 'loading') {
@@ -50,7 +54,9 @@ class WhatsAppAI {
     }
 
     setupEventListeners() {
-        // Verificar que los elementos existan antes de agregar listeners
+        // ===== LISTENERS BÁSICOS =====
+        
+        // Login form
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
@@ -59,6 +65,7 @@ class WhatsAppAI {
             });
         }
 
+        // Logout button
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -66,6 +73,7 @@ class WhatsAppAI {
             });
         }
 
+        // AI toggle
         const aiToggle = document.getElementById('aiToggle');
         if (aiToggle) {
             aiToggle.addEventListener('change', (e) => {
@@ -73,6 +81,7 @@ class WhatsAppAI {
             });
         }
 
+        // Send button
         const sendBtn = document.getElementById('sendBtn');
         if (sendBtn) {
             sendBtn.addEventListener('click', () => {
@@ -80,6 +89,9 @@ class WhatsAppAI {
             });
         }
 
+        // ===== FUNCIONALIDADES MEJORADAS =====
+        
+        // Message input con mejoras
         const messageInput = document.getElementById('messageInput');
         if (messageInput) {
             // Enter para enviar mensaje
@@ -94,6 +106,76 @@ class WhatsAppAI {
             messageInput.addEventListener('input', (e) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = e.target.scrollHeight + 'px';
+                
+                // Actualizar contador de caracteres
+                this.updateCharCounter(e.target.value.length);
+                
+                // Habilitar/deshabilitar botón de envío
+                this.toggleSendButton(e.target.value.trim().length > 0);
+            });
+        }
+
+        // ===== NUEVAS FUNCIONALIDADES =====
+        
+        // Búsqueda de chats
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value.toLowerCase();
+                this.filterAndRenderChats();
+            });
+        }
+
+        // Filtros de chats
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Actualizar filtro activo
+                filterBtns.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                this.activeFilter = e.target.dataset.filter;
+                this.filterAndRenderChats();
+            });
+        });
+
+        // Botón de actualizar
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.refreshData();
+            });
+        }
+
+        // Scroll to bottom
+        const scrollToBottom = document.getElementById('scrollToBottom');
+        if (scrollToBottom) {
+            scrollToBottom.addEventListener('click', () => {
+                this.scrollToBottom();
+            });
+        }
+
+        // Detectar scroll para mostrar/ocultar botón
+        const messagesContainer = document.getElementById('messagesContainer');
+        if (messagesContainer) {
+            messagesContainer.addEventListener('scroll', () => {
+                this.handleScroll();
+            });
+        }
+
+        // Botón emoji (placeholder)
+        const emojiBtn = document.getElementById('emojiBtn');
+        if (emojiBtn) {
+            emojiBtn.addEventListener('click', () => {
+                this.showEmojiPicker();
+            });
+        }
+
+        // Botón adjuntar (placeholder)
+        const attachBtn = document.getElementById('attachBtn');
+        if (attachBtn) {
+            attachBtn.addEventListener('click', () => {
+                this.showAttachmentOptions();
             });
         }
     }
@@ -221,6 +303,7 @@ class WhatsAppAI {
         if (this.chats.length === 0) {
             chatsList.innerHTML = `
                 <div class="empty-state">
+                    <div class="empty-icon">💬</div>
                     <p>No hay chats disponibles</p>
                     <small>Los chats aparecerán aquí cuando recibas mensajes</small>
                 </div>
@@ -228,21 +311,179 @@ class WhatsAppAI {
             return;
         }
 
-        chatsList.innerHTML = this.chats.map(chat => `
+        // Filtrar chats según búsqueda y filtros
+        const filteredChats = this.getFilteredChats();
+
+        if (filteredChats.length === 0) {
+            chatsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <p>No se encontraron chats</p>
+                    <small>Intenta cambiar los filtros o búsqueda</small>
+                </div>
+            `;
+            return;
+        }
+
+        chatsList.innerHTML = filteredChats.map(chat => `
             <div class="chat-item ${chat.whatsapp_id === this.currentChatId ? 'active' : ''}" 
-                 onclick="app.selectChat('${chat.whatsapp_id}')">
-                <div class="chat-item-header">
-                    <span class="contact-name">${chat.contact_name || chat.whatsapp_id}</span>
-                    <span class="ai-status ${chat.ai_enabled ? 'ai-enabled' : 'ai-disabled'}">
-                        ${chat.ai_enabled ? '🤖 IA' : '👨‍💼 Manual'}
-                    </span>
+                 onclick="app.selectChat('${chat.whatsapp_id}')"
+                 data-chat-id="${chat.whatsapp_id}">
+                <div class="chat-item-avatar">
+                    <span>${this.getContactInitials(chat.contact_name || chat.whatsapp_id)}</span>
                 </div>
-                <div class="last-message">
-                    ${this.formatLastActivity(chat.last_activity)}
+                <div class="chat-item-content">
+                    <div class="chat-item-header">
+                        <span class="contact-name">${this.highlightSearchTerm(chat.contact_name || chat.whatsapp_id)}</span>
+                        <span class="chat-time">${this.formatLastActivity(chat.last_activity)}</span>
+                    </div>
+                    <div class="chat-item-preview">
+                        <span class="last-message">${chat.last_message || 'Sin mensajes'}</span>
+                        <div class="chat-badges">
+                            <span class="ai-status ${chat.ai_enabled ? 'ai-enabled' : 'ai-disabled'}">
+                                ${chat.ai_enabled ? '🤖' : '👨‍💼'}
+                            </span>
+                            ${chat.unread_count > 0 ? `<span class="unread-badge">${chat.unread_count}</span>` : ''}
+                        </div>
+                    </div>
                 </div>
-                ${chat.unread_count > 0 ? `<div class="unread-badge">${chat.unread_count}</div>` : ''}
             </div>
         `).join('');
+
+        // Actualizar estadísticas
+        this.updateStats();
+    }
+
+    // ===== NUEVOS MÉTODOS PARA FUNCIONALIDADES MEJORADAS =====
+
+    getFilteredChats() {
+        let filtered = this.chats;
+
+        // Filtrar por búsqueda
+        if (this.searchQuery) {
+            filtered = filtered.filter(chat => 
+                (chat.contact_name || chat.whatsapp_id).toLowerCase().includes(this.searchQuery) ||
+                (chat.last_message || '').toLowerCase().includes(this.searchQuery)
+            );
+        }
+
+        // Filtrar por tipo
+        switch (this.activeFilter) {
+            case 'ai':
+                filtered = filtered.filter(chat => chat.ai_enabled);
+                break;
+            case 'manual':
+                filtered = filtered.filter(chat => !chat.ai_enabled);
+                break;
+            case 'unread':
+                filtered = filtered.filter(chat => chat.unread_count > 0);
+                break;
+            default:
+                // 'all' - no filtrar
+                break;
+        }
+
+        return filtered.sort((a, b) => new Date(b.last_activity) - new Date(a.last_activity));
+    }
+
+    filterAndRenderChats() {
+        this.renderChats();
+    }
+
+    getContactInitials(name) {
+        if (!name) return '?';
+        const names = name.split(' ');
+        if (names.length === 1) return names[0].charAt(0).toUpperCase();
+        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    }
+
+    highlightSearchTerm(text) {
+        if (!this.searchQuery) return text;
+        const regex = new RegExp(`(${this.searchQuery})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    updateStats() {
+        const totalChats = document.getElementById('totalChats');
+        const aiChats = document.getElementById('aiChats');
+        
+        if (totalChats) totalChats.textContent = this.chats.length;
+        if (aiChats) aiChats.textContent = this.chats.filter(chat => chat.ai_enabled).length;
+    }
+
+    updateCharCounter(length) {
+        const charCounter = document.getElementById('charCounter');
+        if (charCounter) {
+            charCounter.textContent = `${length}/4096`;
+            if (length > 3800) {
+                charCounter.style.color = '#ff4444';
+            } else if (length > 3000) {
+                charCounter.style.color = '#ff8800';
+            } else {
+                charCounter.style.color = 'var(--text-secondary)';
+            }
+        }
+    }
+
+    toggleSendButton(enabled) {
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) {
+            sendBtn.disabled = !enabled;
+        }
+    }
+
+    handleScroll() {
+        const messagesContainer = document.getElementById('messagesContainer');
+        const scrollToBottomBtn = document.getElementById('scrollToBottom');
+        
+        if (!messagesContainer || !scrollToBottomBtn) return;
+
+        const isNearBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= 
+                           messagesContainer.scrollHeight - 100;
+        
+        scrollToBottomBtn.style.display = isNearBottom ? 'none' : 'block';
+    }
+
+    async refreshData() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                refreshBtn.style.transform = 'rotate(0deg)';
+            }, 500);
+        }
+
+        await this.loadChats();
+        if (this.currentChatId) {
+            await this.loadMessages(this.currentChatId);
+        }
+        this.showSuccess('Datos actualizados');
+    }
+
+    showEmojiPicker() {
+        // Placeholder para funcionalidad de emojis
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            const emojis = ['😊', '😂', '❤️', '👍', '🙏', '😍', '😭', '🔥', '💯', '👏'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            messageInput.value += randomEmoji;
+            messageInput.focus();
+            
+            // Trigger input event para auto-resize y contador
+            messageInput.dispatchEvent(new Event('input'));
+        }
+    }
+
+    showAttachmentOptions() {
+        // Placeholder para opciones de adjuntos
+        this.showSuccess('Funcionalidad de adjuntos próximamente');
+    }
+
+    showTypingIndicator(show = true) {
+        const typingContainer = document.getElementById('typingContainer');
+        if (typingContainer) {
+            typingContainer.style.display = show ? 'flex' : 'none';
+        }
     }
 
     async selectChat(whatsappId) {
@@ -251,20 +492,48 @@ class WhatsAppAI {
         
         if (!chat) return;
 
-        // Actualizar UI
+        // Actualizar UI del header
         document.getElementById('currentChatName').textContent = chat.contact_name || whatsappId;
         document.getElementById('currentChatId').textContent = whatsappId;
         document.getElementById('aiToggle').checked = chat.ai_enabled;
         
+        // Actualizar avatar del contacto
+        const contactAvatar = document.getElementById('contactAvatar');
+        if (contactAvatar) {
+            contactAvatar.textContent = this.getContactInitials(chat.contact_name || whatsappId);
+        }
+
         // Mostrar vista del chat
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('chatView').style.display = 'flex';
 
-        // Cargar mensajes
+        // Cargar mensajes con indicador de carga
+        this.showLoadingMessages();
         await this.loadMessages(whatsappId);
         
-        // Actualizar lista de chats
+        // Actualizar lista de chats para mostrar selección
         this.renderChats();
+
+        // Auto-focus en input de mensaje
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            setTimeout(() => messageInput.focus(), 100);
+        }
+
+        // Scroll to bottom
+        setTimeout(() => this.scrollToBottom(), 100);
+    }
+
+    showLoadingMessages() {
+        const messagesContainer = document.getElementById('messagesContainer');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = `
+                <div class="loading-messages">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando mensajes...</p>
+                </div>
+            `;
+        }
     }
 
     async loadMessages(whatsappId) {
@@ -351,12 +620,30 @@ class WhatsAppAI {
 
         if (!message || !this.currentChatId) return;
 
+        // Deshabilitar controles
         sendBtn.disabled = true;
         messageInput.disabled = true;
+        
+        // Mostrar indicador de envío
+        const originalBtnContent = sendBtn.innerHTML;
+        sendBtn.innerHTML = '<div class="sending-spinner"></div>';
 
         try {
-            // Usar el phone_number_id configurado en las variables de entorno
-            const phoneNumberId = '673644539175036'; // Tu Phone Number ID
+            // Mostrar mensaje como "enviando" inmediatamente
+            this.addOptimisticMessage(message);
+            
+            // Limpiar input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            this.updateCharCounter(0);
+
+            // Simular typing de IA si está habilitado
+            const chat = this.chats.find(c => c.whatsapp_id === this.currentChatId);
+            if (chat && chat.ai_enabled) {
+                setTimeout(() => this.showTypingIndicator(true), 1000);
+            }
+
+            const phoneNumberId = '673644539175036';
 
             const response = await this.makeAuthenticatedRequest('/manual-override', {
                 action: 'send_message',
@@ -366,23 +653,56 @@ class WhatsAppAI {
             });
 
             if (response && response.success) {
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
-                
-                // Recargar mensajes en lugar de agregar manualmente
+                // Recargar mensajes para obtener el estado real
                 await this.loadMessages(this.currentChatId);
                 this.showSuccess('Mensaje enviado');
+                
+                // Ocultar typing indicator después de un tiempo
+                if (chat && chat.ai_enabled) {
+                    setTimeout(() => this.showTypingIndicator(false), 3000);
+                }
             } else {
                 console.error('Failed to send message:', response);
                 this.showError('Error al enviar mensaje');
+                this.removeOptimisticMessage();
             }
         } catch (error) {
             console.error('Error sending message:', error);
             this.showError('Error al enviar mensaje');
+            this.removeOptimisticMessage();
         } finally {
+            // Restaurar controles
             sendBtn.disabled = false;
             messageInput.disabled = false;
+            sendBtn.innerHTML = originalBtnContent;
             messageInput.focus();
+        }
+    }
+
+    addOptimisticMessage(messageText) {
+        const messagesContainer = document.getElementById('messagesContainer');
+        if (!messagesContainer) return;
+
+        const tempMessage = document.createElement('div');
+        tempMessage.className = 'message outgoing optimistic';
+        tempMessage.id = 'optimistic-message';
+        tempMessage.innerHTML = `
+            <div class="message-bubble">
+                <div>${this.escapeHtml(messageText)}</div>
+                <div class="message-time">
+                    Enviando... <span class="sending-indicator">⏳</span>
+                </div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(tempMessage);
+        this.scrollToBottom();
+    }
+
+    removeOptimisticMessage() {
+        const optimisticMsg = document.getElementById('optimistic-message');
+        if (optimisticMsg) {
+            optimisticMsg.remove();
         }
     }
 
@@ -475,13 +795,50 @@ class WhatsAppAI {
     }
 
     showSuccess(message) {
-        // Implementar notificación de éxito en consola
-        console.log('✅ Success:', message);
+        this.showNotification(message, 'success');
     }
 
     showError(message) {
-        // Solo log en consola, no alert para evitar spam
-        console.error('❌ Error:', message);
+        this.showNotification(message, 'error');
+    }
+
+    showNotification(message, type = 'info') {
+        // Crear elemento de notificación
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span class="notification-message">${message}</span>
+            </div>
+            <button class="notification-close">×</button>
+        `;
+
+        // Agregar al DOM
+        document.body.appendChild(notification);
+
+        // Mostrar con animación
+        setTimeout(() => notification.classList.add('show'), 100);
+
+        // Auto-ocultar después de 3 segundos
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+
+        // Permitir cerrar manualmente
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        });
     }
 }
 
