@@ -25,12 +25,15 @@ class WhatsAppAI {
     }
 
     async initializeApp() {
+        console.log('🚀 Initializing WhatsApp AI...');
         this.setupEventListeners();
         
         // DEMO MODE: Saltar autenticación y mostrar datos demo
-        console.log('DEMO MODE: Loading demo data...');
+        console.log('🔧 DEMO MODE: Loading demo data...');
         this.showMainApp();
+        console.log('📱 Main app displayed');
         await this.loadChats();
+        console.log('💬 Chats loaded');
         // this.startPolling(); // Desactivado en modo demo
         
         // Código original para producción:
@@ -280,8 +283,26 @@ class WhatsAppAI {
     }
 
     showMainApp() {
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('mainContainer').style.display = 'flex';
+        console.log('🔄 Showing main app...');
+        const loginContainer = document.getElementById('loginContainer');
+        const mainContainer = document.getElementById('mainContainer');
+        
+        console.log('Login container:', loginContainer);
+        console.log('Main container:', mainContainer);
+        
+        if (loginContainer) {
+            loginContainer.style.display = 'none';
+            console.log('✅ Login container hidden');
+        } else {
+            console.error('❌ Login container not found');
+        }
+        
+        if (mainContainer) {
+            mainContainer.style.display = 'flex';
+            console.log('✅ Main container shown');
+        } else {
+            console.error('❌ Main container not found');
+        }
     }
 
     async loadChats() {
@@ -360,9 +381,17 @@ class WhatsAppAI {
     }
 
     renderChats() {
+        console.log('🎨 Rendering chats...', this.chats.length);
         const chatsList = document.getElementById('chatsList');
+        console.log('Chats list element:', chatsList);
+        
+        if (!chatsList) {
+            console.error('❌ chatsList element not found');
+            return;
+        }
         
         if (this.chats.length === 0) {
+            console.log('📭 No chats to display');
             chatsList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">💬</div>
@@ -375,6 +404,7 @@ class WhatsAppAI {
 
         // Filtrar chats según búsqueda y filtros
         const filteredChats = this.getFilteredChats();
+        console.log('📱 Filtered chats:', filteredChats.length);
 
         if (filteredChats.length === 0) {
             chatsList.innerHTML = `
