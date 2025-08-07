@@ -65,122 +65,19 @@
             overflow: hidden;
         }
 
-        /* ===== LOGIN CONTAINER ===== */
-        .login-container {
+        /* ===== CONTAINERS PRINCIPALES ===== */
+        .app-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-        }
-
-        .login-box {
-            background: var(--background-white);
-            padding: 3rem;
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-header {
-            margin-bottom: 2rem;
-        }
-
-        .login-header h1 {
-            font-size: 1.75rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .login-header p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border-light);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            transition: all 0.2s ease;
+            max-width: 100vw;
             background: var(--background-white);
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-            color: white;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 1rem;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .login-btn:disabled {
-            background: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error-red);
-            padding: 0.75rem;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-
-        /* ===== MAIN CONTAINER ===== */
-        .main-container {
-            display: flex; /* Cambiado para modo demo */
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* ===== LOGIN CONTAINER (oculto en modo demo) ===== */
-        .login-container {
-            display: none; /* Oculto en modo demo */
-        }
-
-        /* ===== HEADER PRINCIPAL COMPACTO ===== */
+        /* ===== HEADER PRINCIPAL ===== */
         .header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -188,28 +85,25 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            height: 60px;
-            flex-shrink: 0;
         }
 
         .header h1 {
-            font-size: 1.25rem;
+            font-size: 1.75rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .logout-btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border-radius: var(--radius-md);
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s ease;
-            font-size: 0.875rem;
         }
 
         .logout-btn:hover {
@@ -220,9 +114,8 @@
         /* ===== LAYOUT PRINCIPAL ===== */
         .main-layout {
             display: flex;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 80px);
             width: 100%;
-            flex: 1;
         }
 
         /* ===== SIDEBAR ===== */
@@ -407,27 +300,6 @@
             background: rgba(245, 158, 11, 0.1);
             color: var(--warning-orange);
             border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
-        .unread-badge {
-            background: var(--primary-blue);
-            color: white;
-            border-radius: 50%;
-            min-width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .chat-badges {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-shrink: 0;
         }
 
         /* ===== ÁREA DE CHAT ===== */
@@ -691,117 +563,92 @@
     </style>
 </head>
 <body>
-    <!-- Container de Login -->
-    <div id="loginContainer" class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>📱 WhatsApp AI</h1>
-                <p>Panel de Control</p>
+    <!-- Header Principal -->
+    <header class="header">
+        <h1>
+            <span>📱</span>
+            WhatsApp AI - Panel de Control
+        </h1>
+        <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+    </header>
+
+    <!-- Layout Principal -->
+    <div class="main-layout">
+        <!-- Sidebar con Lista de Chats -->
+        <div class="sidebar">
+            <!-- Búsqueda -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    placeholder="🔍 Buscar conversaciones..."
+                    id="searchInput"
+                >
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Usuario</label>
-                    <input type="text" id="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="login-btn" id="loginBtn">Iniciar Sesión</button>
-            </form>
-            <div id="loginError" class="error-message" style="display: none;"></div>
+
+            <!-- Filtros -->
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="ai">Con IA</button>
+                <button class="filter-btn" data-filter="manual">Manual</button>
+                <button class="filter-btn" data-filter="unread">No leídos</button>
+            </div>
+
+            <!-- Lista de Chats -->
+            <div class="chat-list" id="chatList">
+                <!-- Los chats se cargan dinámicamente -->
+            </div>
         </div>
-    </div>
 
-    <!-- Container Principal -->
-    <div id="mainContainer" class="main-container">
-        <!-- Header Principal -->
-        <header class="header">
-            <h1>
-                <span>📱</span>
-                WhatsApp AI - Panel de Control
-            </h1>
-            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
-        </header>
-
-        <!-- Layout Principal -->
-        <div class="main-layout">
-            <!-- Sidebar con Lista de Chats -->
-            <div class="sidebar">
-                <!-- Búsqueda -->
-                <div class="search-container">
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        placeholder="🔍 Buscar conversaciones..."
-                        id="searchInput"
-                    >
-                </div>
-
-                <!-- Filtros -->
-                <div class="filters">
-                    <button class="filter-btn active" data-filter="all">Todos</button>
-                    <button class="filter-btn" data-filter="ai">Con IA</button>
-                    <button class="filter-btn" data-filter="manual">Manual</button>
-                    <button class="filter-btn" data-filter="unread">No leídos</button>
-                </div>
-
-                <!-- Lista de Chats -->
-                <div class="chat-list" id="chatsList">
-                    <!-- Los chats se cargan dinámicamente -->
-                </div>
+        <!-- Área Principal de Chat -->
+        <div class="chat-area">
+            <!-- Estado Vacío -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">💬</div>
+                <h3>¡Bienvenido a WhatsApp AI!</h3>
+                <p>Selecciona una conversación para comenzar a gestionar tus chats con inteligencia artificial.</p>
             </div>
 
-            <!-- Área Principal de Chat -->
-            <div class="chat-area">
-                <!-- Estado Vacío -->
-                <div class="empty-state" id="emptyState">
-                    <div class="empty-icon">💬</div>
-                    <h3>¡Bienvenido a WhatsApp AI!</h3>
-                    <p>Selecciona una conversación para comenzar a gestionar tus chats con inteligencia artificial.</p>
+            <!-- Vista de Chat (oculta inicialmente) -->
+            <div id="chatView" class="hidden">
+                <!-- Header del Chat -->
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="chat-avatar">
+                            <span id="currentChatAvatar">👤</span>
+                        </div>
+                        <div class="chat-info">
+                            <h3 id="currentChatName">Nombre del Contacto</h3>
+                            <div class="chat-status">
+                                <span id="currentChatId">ID de WhatsApp</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ai-toggle" id="aiToggle">
+                        <span>🤖</span>
+                        <span>IA: OFF</span>
+                    </div>
                 </div>
 
-                <!-- Vista de Chat (oculta inicialmente) -->
-                <div id="chatView" class="hidden">
-                    <!-- Header del Chat -->
-                    <div class="chat-header">
-                        <div class="chat-header-left">
-                            <div class="chat-avatar">
-                                <span id="currentChatAvatar">👤</span>
-                            </div>
-                            <div class="chat-info">
-                                <h3 id="currentChatName">Nombre del Contacto</h3>
-                                <div class="chat-status">
-                                    <span id="currentChatId">ID de WhatsApp</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ai-toggle" id="aiToggle">
-                            <span>🤖</span>
-                            <span>IA: OFF</span>
-                        </div>
-                    </div>
+                <!-- Mensajes -->
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Los mensajes se cargan dinámicamente -->
+                </div>
 
-                    <!-- Mensajes -->
-                    <div class="messages-container" id="messagesContainer">
-                        <!-- Los mensajes se cargan dinámicamente -->
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="input-area">
-                        <textarea 
-                            id="messageInput" 
-                            class="message-input" 
-                            placeholder="Escribe tu mensaje aquí..."
-                            rows="1"
-                        ></textarea>
-                        <button id="sendBtn" class="send-btn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="m22 2-7 20-4-9-9-4Z"/>
-                                <path d="M22 2 11 13"/>
-                            </svg>
-                        </button>
-                    </div>
+                <!-- Input Area -->
+                <div class="input-area">
+                    <textarea 
+                        id="messageInput" 
+                        class="message-input" 
+                        placeholder="Escribe tu mensaje aquí..."
+                        rows="1"
+                    ></textarea>
+                    <button id="sendBtn" class="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="m22 2-7 20-4-9-9-4Z"/>
+                            <path d="M22 2 11 13"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
