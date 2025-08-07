@@ -630,6 +630,13 @@ class WhatsAppAI {
 
     async loadMessages(whatsappId) {
         try {
+            // Si no hay token (modo demo), usar datos demo
+            if (!this.token) {
+                console.log('🔧 DEMO MODE: Loading demo messages for', whatsappId);
+                this.loadDemoMessages(whatsappId);
+                return;
+            }
+
             const response = await this.makeAuthenticatedRequest('/manual-override', {
                 action: 'get_messages',
                 whatsapp_id: whatsappId
@@ -650,6 +657,140 @@ class WhatsAppAI {
             this.renderMessages();
             // No mostrar alert para evitar spam
         }
+    }
+
+    loadDemoMessages(whatsappId) {
+        // Datos demo de mensajes para cada conversación
+        const demoMessages = {
+            "521234567890@c.us": [ // María García
+                {
+                    id: "msg1",
+                    whatsapp_id: whatsappId,
+                    message_text: "Hola, buenos días! Necesito información sobre sus servicios",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 600000).toISOString() // 10 min ago
+                },
+                {
+                    id: "msg2", 
+                    whatsapp_id: whatsappId,
+                    message_text: "¡Hola María! Con mucho gusto te ayudo. ¿Qué tipo de servicio te interesa?",
+                    direction: "outgoing",
+                    is_ai_generated: true,
+                    created_at: new Date(Date.now() - 480000).toISOString() // 8 min ago
+                },
+                {
+                    id: "msg3",
+                    whatsapp_id: whatsappId,
+                    message_text: "Me interesa el paquete empresarial para mi negocio",
+                    direction: "incoming", 
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 300000).toISOString() // 5 min ago
+                },
+                {
+                    id: "msg4",
+                    whatsapp_id: whatsappId,
+                    message_text: "Perfecto! El paquete empresarial incluye gestión completa de WhatsApp Business, IA integrada y soporte 24/7. ¿Te gustaría que te envíe más detalles?",
+                    direction: "outgoing",
+                    is_ai_generated: true,
+                    created_at: new Date(Date.now() - 180000).toISOString() // 3 min ago
+                }
+            ],
+            "521234567891@c.us": [ // Juan Pérez
+                {
+                    id: "msg5",
+                    whatsapp_id: whatsappId,
+                    message_text: "Hola, tengo una consulta sobre mi cuenta",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 1200000).toISOString() // 20 min ago
+                },
+                {
+                    id: "msg6",
+                    whatsapp_id: whatsappId,
+                    message_text: "Hola Juan, dime en qué puedo ayudarte con tu cuenta",
+                    direction: "outgoing",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 1080000).toISOString() // 18 min ago
+                },
+                {
+                    id: "msg7",
+                    whatsapp_id: whatsappId,
+                    message_text: "Ya pude resolver el problema, muchas gracias por la ayuda",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 900000).toISOString() // 15 min ago
+                }
+            ],
+            "521234567892@c.us": [ // Ana Rodríguez
+                {
+                    id: "msg8",
+                    whatsapp_id: whatsappId,
+                    message_text: "¿Tienen disponibilidad para mañana?",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 1800000).toISOString() // 30 min ago
+                },
+                {
+                    id: "msg9",
+                    whatsapp_id: whatsappId,
+                    message_text: "Hola Ana! Sí, tenemos disponibilidad mañana. ¿A qué hora te convendría?",
+                    direction: "outgoing",
+                    is_ai_generated: true,
+                    created_at: new Date(Date.now() - 1740000).toISOString() // 29 min ago
+                }
+            ],
+            "521234567893@c.us": [ // Carlos López
+                {
+                    id: "msg10",
+                    whatsapp_id: whatsappId,
+                    message_text: "Necesito revisar mi pedido anterior",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 4200000).toISOString() // 70 min ago
+                },
+                {
+                    id: "msg11",
+                    whatsapp_id: whatsappId,
+                    message_text: "Claro Carlos, déjame revisar tu pedido. Un momento por favor.",
+                    direction: "outgoing",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 4080000).toISOString() // 68 min ago
+                },
+                {
+                    id: "msg12",
+                    whatsapp_id: whatsappId,
+                    message_text: "Entiendo, estaré esperando su respuesta",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 3600000).toISOString() // 60 min ago
+                }
+            ],
+            "521234567894@c.us": [ // Sofia Martínez
+                {
+                    id: "msg13",
+                    whatsapp_id: whatsappId,
+                    message_text: "¡Excelente servicio! Muy recomendado",
+                    direction: "incoming",
+                    is_ai_generated: false,
+                    created_at: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
+                },
+                {
+                    id: "msg14",
+                    whatsapp_id: whatsappId,
+                    message_text: "¡Muchas gracias Sofia! Nos alegra saber que estás satisfecha con nuestro servicio. 😊",
+                    direction: "outgoing",
+                    is_ai_generated: true,
+                    created_at: new Date(Date.now() - 7080000).toISOString() // 118 min ago
+                }
+            ]
+        };
+
+        // Cargar mensajes demo para el chat seleccionado
+        this.messages = demoMessages[whatsappId] || [];
+        console.log('📱 Demo messages loaded:', this.messages.length, 'for chat:', whatsappId);
+        this.renderMessages();
+        this.scrollToBottom();
     }
 
     renderMessages() {
@@ -682,6 +823,18 @@ class WhatsAppAI {
         if (!this.currentChatId) return;
 
         try {
+            // Si no hay token (modo demo), solo actualizar localmente
+            if (!this.token) {
+                console.log('🔧 DEMO MODE: Toggling AI for', this.currentChatId, 'to', enabled);
+                const chat = this.chats.find(c => c.whatsapp_id === this.currentChatId);
+                if (chat) {
+                    chat.ai_enabled = enabled;
+                }
+                this.renderChats();
+                this.showSuccess(`IA ${enabled ? 'activada' : 'desactivada'} para este chat`);
+                return;
+            }
+
             const response = await this.makeAuthenticatedRequest('/manual-override', {
                 action: 'toggle_ai',
                 whatsapp_id: this.currentChatId,
@@ -735,6 +888,48 @@ class WhatsAppAI {
                 setTimeout(() => this.showTypingIndicator(true), 1000);
             }
 
+            // Si no hay token (modo demo), simular envío
+            if (!this.token) {
+                console.log('🔧 DEMO MODE: Simulating message send');
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay de envío
+                
+                // Agregar mensaje a la lista demo
+                const newMessage = {
+                    id: `demo-msg-${Date.now()}`,
+                    whatsapp_id: this.currentChatId,
+                    message_text: message,
+                    direction: "outgoing",
+                    is_ai_generated: false,
+                    created_at: new Date().toISOString()
+                };
+                
+                this.messages.push(newMessage);
+                
+                // Remover mensaje optimista y renderizar mensajes reales
+                this.removeOptimisticMessage();
+                this.renderMessages();
+                this.scrollToBottom();
+                
+                // Actualizar último mensaje en la lista de chats
+                if (chat) {
+                    chat.last_message = message;
+                    chat.last_message_time = new Date().toISOString();
+                    this.renderChats();
+                }
+                
+                this.showSuccess('Mensaje enviado (Demo)');
+                
+                // Simular respuesta de IA después de un tiempo
+                if (chat && chat.ai_enabled) {
+                    setTimeout(() => {
+                        this.simulateAIResponse();
+                        this.showTypingIndicator(false);
+                    }, 3000);
+                }
+                
+                return;
+            }
+
             const phoneNumberId = '673644539175036';
 
             const response = await this.makeAuthenticatedRequest('/manual-override', {
@@ -768,6 +963,41 @@ class WhatsAppAI {
             messageInput.disabled = false;
             sendBtn.innerHTML = originalBtnContent;
             messageInput.focus();
+        }
+    }
+
+    simulateAIResponse() {
+        if (!this.currentChatId) return;
+        
+        const aiResponses = [
+            "Gracias por tu mensaje. Te responderé en breve.",
+            "He recibido tu consulta y la estoy revisando.",
+            "Perfecto, déjame verificar esa información para ti.",
+            "Entendido, ¿hay algo más en lo que pueda ayudarte?",
+            "Gracias por contactarnos. ¿Necesitas información adicional?"
+        ];
+        
+        const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        
+        const aiMessage = {
+            id: `demo-ai-msg-${Date.now()}`,
+            whatsapp_id: this.currentChatId,
+            message_text: randomResponse,
+            direction: "outgoing",
+            is_ai_generated: true,
+            created_at: new Date().toISOString()
+        };
+        
+        this.messages.push(aiMessage);
+        this.renderMessages();
+        this.scrollToBottom();
+        
+        // Actualizar último mensaje en la lista de chats
+        const chat = this.chats.find(c => c.whatsapp_id === this.currentChatId);
+        if (chat) {
+            chat.last_message = randomResponse;
+            chat.last_message_time = new Date().toISOString();
+            this.renderChats();
         }
     }
 
