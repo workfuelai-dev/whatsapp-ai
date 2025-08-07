@@ -27,6 +27,14 @@ class WhatsAppAI {
     async initializeApp() {
         this.setupEventListeners();
         
+        // DEMO MODE: Saltar autenticación y mostrar datos demo
+        console.log('DEMO MODE: Loading demo data...');
+        this.showMainApp();
+        await this.loadChats();
+        // this.startPolling(); // Desactivado en modo demo
+        
+        // Código original para producción:
+        /*
         // Verificar si ya está autenticado
         if (this.token) {
             try {
@@ -51,6 +59,7 @@ class WhatsAppAI {
         } else {
             this.showLogin();
         }
+        */
     }
 
     setupEventListeners() {
@@ -286,15 +295,68 @@ class WhatsAppAI {
                 this.renderChats();
             } else {
                 console.error('Failed to load chats:', response);
-                this.chats = [];
-                this.renderChats();
+                // Si no hay backend, cargar datos de demo
+                this.loadDemoChats();
             }
         } catch (error) {
             console.error('Error loading chats:', error);
-            this.chats = [];
-            this.renderChats();
-            // No mostrar alert para evitar spam de notificaciones
+            // Si hay error de conexión, cargar datos de demo
+            this.loadDemoChats();
         }
+    }
+
+    loadDemoChats() {
+        // Datos de demostración para mostrar la interfaz funcionando
+        this.chats = [
+            {
+                whatsapp_id: "521234567890@c.us",
+                contact_name: "María García",
+                last_message: "Hola, necesito información sobre sus servicios",
+                last_message_time: new Date(Date.now() - 300000).toISOString(), // 5 min ago
+                ai_enabled: true,
+                unread_count: 2,
+                direction: "incoming"
+            },
+            {
+                whatsapp_id: "521234567891@c.us", 
+                contact_name: "Juan Pérez",
+                last_message: "Perfecto, muchas gracias por la ayuda",
+                last_message_time: new Date(Date.now() - 900000).toISOString(), // 15 min ago
+                ai_enabled: false,
+                unread_count: 0,
+                direction: "outgoing"
+            },
+            {
+                whatsapp_id: "521234567892@c.us",
+                contact_name: "Ana Rodríguez", 
+                last_message: "¿Tienen disponibilidad para mañana?",
+                last_message_time: new Date(Date.now() - 1800000).toISOString(), // 30 min ago
+                ai_enabled: true,
+                unread_count: 1,
+                direction: "incoming"
+            },
+            {
+                whatsapp_id: "521234567893@c.us",
+                contact_name: "Carlos López",
+                last_message: "Entiendo, estaré esperando su respuesta",
+                last_message_time: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+                ai_enabled: false,
+                unread_count: 0,
+                direction: "incoming"
+            },
+            {
+                whatsapp_id: "521234567894@c.us",
+                contact_name: "Sofia Martínez",
+                last_message: "¡Excelente servicio! Muy recomendado",
+                last_message_time: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+                ai_enabled: true,
+                unread_count: 0,
+                direction: "incoming"
+            }
+        ];
+        
+        console.log('Loaded demo chats:', this.chats.length);
+        this.renderChats();
     }
 
     renderChats() {
@@ -329,19 +391,19 @@ class WhatsAppAI {
             <div class="chat-item ${chat.whatsapp_id === this.currentChatId ? 'active' : ''}" 
                  onclick="app.selectChat('${chat.whatsapp_id}')"
                  data-chat-id="${chat.whatsapp_id}">
-                <div class="chat-item-avatar">
+                <div class="chat-avatar">
                     <span>${this.getContactInitials(chat.contact_name || chat.whatsapp_id)}</span>
                 </div>
-                <div class="chat-item-content">
-                    <div class="chat-item-header">
+                <div class="chat-content-info">
+                    <div class="chat-header-info">
                         <span class="contact-name">${this.highlightSearchTerm(chat.contact_name || chat.whatsapp_id)}</span>
-                        <span class="chat-time">${this.formatLastActivity(chat.last_activity)}</span>
+                        <span class="chat-time">${this.formatLastActivity(chat.last_message_time)}</span>
                     </div>
-                    <div class="chat-item-preview">
+                    <div class="chat-preview">
                         <span class="last-message">${chat.last_message || 'Sin mensajes'}</span>
                         <div class="chat-badges">
                             <span class="ai-status ${chat.ai_enabled ? 'ai-enabled' : 'ai-disabled'}">
-                                ${chat.ai_enabled ? '🤖' : '👨‍💼'}
+                                ${chat.ai_enabled ? '🤖 IA' : '👨‍💼 Manual'}
                             </span>
                             ${chat.unread_count > 0 ? `<span class="unread-badge">${chat.unread_count}</span>` : ''}
                         </div>
